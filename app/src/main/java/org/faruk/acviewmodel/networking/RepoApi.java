@@ -4,10 +4,6 @@ import com.squareup.moshi.Moshi;
 
 import org.faruk.acviewmodel.model.ModelAdapterFactory;
 
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
@@ -16,40 +12,41 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
  * Copyright (c) 2018 Hürriyet to present
  * All rights reserved.
  */
-@Module
-public abstract class NetworkModule {
+public class RepoApi {
 
     private static final String BASE_URL = "https://api.github.com/";
 
-    @Provides
-    @Singleton
-    static Moshi provideMoshi() {
-        return new Moshi.Builder()
-                .add(ModelAdapterFactory.create())
-                .build();
+    private static Retrofit retrofit;
+    private static RepoService repoService;
+
+    public static RepoService getInstance() {
+        if (repoService != null) {
+            return repoService;
+        }
+        if (retrofit == null) {
+            initializeRetrofit();
+        }
+        repoService = retrofit.create(RepoService.class);
+        return repoService;
     }
 
-    @Provides
-    @Singleton
-    static Retrofit provideRetrofit(Moshi moshi) {
-        return new Retrofit.Builder()
+    private static void initializeRetrofit() {
+        Moshi moshi = new Moshi.Builder()
+                .add(ModelAdapterFactory.create())
+                .build();
+
+        retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build();
-    }
 
-//    @Provides
-//    @Singleton
-//    static Retrofit provideRetrofit() {
-//        return new Retrofit.Builder()
+//        retrofit = new Retrofit.Builder()
 //                .baseUrl(BASE_URL)
 //                .addConverterFactory(MoshiConverterFactory.create())
 //                .build();
-//    }
+    }
 
-    @Provides
-    @Singleton
-    static RepoService provideRepoService(Retrofit retrofit) {
-        return retrofit.create(RepoService.class);
+    private RepoApi() {
+
     }
 }
