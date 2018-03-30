@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.faruk.acviewmodel.R;
+import org.faruk.acviewmodel.details.DetailsFragment;
+import org.faruk.acviewmodel.model.Repo;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,11 +25,14 @@ import butterknife.Unbinder;
  * Copyright (c) 2018 Hürriyet to present
  * All rights reserved.
  */
-public class ListFragment extends Fragment {
+public class ListFragment extends Fragment implements RepoSelectedListener {
 
-    @BindView(R.id.recycler_view) RecyclerView listView;
-    @BindView(R.id.tv_error) TextView errorTextView;
-    @BindView(R.id.loading_view) View loadingView;
+    @BindView(R.id.recycler_view)
+    RecyclerView listView;
+    @BindView(R.id.tv_error)
+    TextView errorTextView;
+    @BindView(R.id.loading_view)
+    View loadingView;
 
     private Unbinder unbinder;
     private ListViewModel viewModel;
@@ -45,9 +50,20 @@ public class ListFragment extends Fragment {
         viewModel = ViewModelProviders.of(this).get(ListViewModel.class);
 
         listView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        listView.setAdapter(new RepoListAdapter(viewModel, this));
+        listView.setAdapter(new RepoListAdapter(viewModel, this, this));
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         observeViewModel();
+    }
+
+    @Override
+    public void onRepoSelected(Repo repo) {
+        SelectedRepoViewModel selectedRepoViewModel = ViewModelProviders.of(getActivity())
+                .get(SelectedRepoViewModel.class);
+        selectedRepoViewModel.setSelectedRepo(repo);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.screen_container, new DetailsFragment())
+                .addToBackStack(null)
+                .commit();
     }
 
     private void observeViewModel() {
