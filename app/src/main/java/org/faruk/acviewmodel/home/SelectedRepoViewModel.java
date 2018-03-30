@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.faruk.acviewmodel.model.Repo;
-import org.faruk.acviewmodel.networking.RepoApi;
+import org.faruk.acviewmodel.networking.RepoService;
+
+import javax.inject.Inject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,8 +23,14 @@ import retrofit2.Response;
 public class SelectedRepoViewModel extends ViewModel {
 
     private final MutableLiveData<Repo> selectedRepo = new MutableLiveData<>();
+    private final RepoService repoService;
 
     private Call<Repo> repoCall;
+
+    @Inject
+    public SelectedRepoViewModel(RepoService repoService) {
+        this.repoService = repoService;
+    }
 
     public LiveData<Repo> getSelectedRepo() {
         return selectedRepo;
@@ -49,7 +57,7 @@ public class SelectedRepoViewModel extends ViewModel {
     }
 
     private void loadRepo(String[] repoDetails) {
-        repoCall = RepoApi.getInstance().getRepo(repoDetails[0], repoDetails[1]);
+        repoCall = repoService.getRepo(repoDetails[0], repoDetails[1]);
         repoCall.enqueue(new Callback<Repo>() {
             @Override
             public void onResponse(Call<Repo> call, Response<Repo> response) {
